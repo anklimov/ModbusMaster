@@ -46,6 +46,9 @@ ModbusMaster::ModbusMaster(void)
   _idle = 0;
   _preTransmission = 0;
   _postTransmission = 0;
+  ku8MaxBufferSize=ku8DefMaxBufferSize;
+  _u16ResponseBuffer=_u16DefResponseBuffer;
+
 }
 
 #ifndef debugSerialPort
@@ -104,7 +107,7 @@ uint8_t ModbusMaster::requestFrom(uint16_t address, uint16_t quantity)
 void ModbusMaster::sendBit(bool data)
 {
   uint8_t txBitIndex = u16TransmitBufferLength % 16;
-  if ((u16TransmitBufferLength >> 4) < ku8MaxBufferSize)
+  if ((u16TransmitBufferLength >> 4) < ku8DefMaxBufferSize)
   {
     if (0 == txBitIndex)
     {
@@ -119,7 +122,7 @@ void ModbusMaster::sendBit(bool data)
 
 void ModbusMaster::send(uint16_t data)
 {
-  if (_u8TransmitBufferIndex < ku8MaxBufferSize)
+  if (_u8TransmitBufferIndex < ku8DefMaxBufferSize)
   {
     _u16TransmitBuffer[_u8TransmitBufferIndex++] = data;
     u16TransmitBufferLength = _u8TransmitBufferIndex << 4;
@@ -270,7 +273,7 @@ Place data in transmit buffer.
 */
 uint8_t ModbusMaster::setTransmitBuffer(uint8_t u8Index, uint16_t u16Value)
 {
-  if (u8Index < ku8MaxBufferSize)
+  if (u8Index < ku8DefMaxBufferSize)
   {
     _u16TransmitBuffer[u8Index] = u16Value;
     return ku8MBSuccess;
@@ -292,7 +295,7 @@ void ModbusMaster::clearTransmitBuffer()
 {
   uint8_t i;
   
-  for (i = 0; i < ku8MaxBufferSize; i++)
+  for (i = 0; i < ku8DefMaxBufferSize; i++)
   {
     _u16TransmitBuffer[i] = 0;
   }
@@ -1052,3 +1055,15 @@ uint8_t ModbusMaster::ModbusRawTransaction(uint8_t *u8ModbusADU,uint8_t u8Modbus
   _u8ResponseBufferIndex = 0;
   return u8MBStatus;
 }
+    void ModbusMaster::setResponseBuffer(uint16_t *bufPtr,size_t bufLen)
+    {
+     ku8MaxBufferSize=bufLen;
+     _u16ResponseBuffer=bufPtr;
+
+    }
+
+    void ModbusMaster::setDefaultResponseBuffer()
+    {
+      ku8MaxBufferSize=ku8DefMaxBufferSize;
+      _u16ResponseBuffer=_u16DefResponseBuffer;
+    }
